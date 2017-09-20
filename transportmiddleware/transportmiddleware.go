@@ -29,5 +29,5 @@ func Apply(ctx context.Context, req *transport.Request) (*transport.Request, err
 	if registeredMiddleware == nil {
 		return req, nil
 	}
-	return registeredMiddleware.Apply(ctx, req)
+	return registeredMiddleware.Apply(ctx, req.DeepCopy())
 }

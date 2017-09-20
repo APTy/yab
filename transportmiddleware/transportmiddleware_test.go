@@ -62,6 +62,8 @@ func TestTransportMiddleware(t *testing.T) {
 		}
 		if tt.wantErr {
 			assert.Error(t, err)
+			_, ok := rawReq.Headers["foo"]
+			assert.False(t, ok, "[%d] test middleware should not have applied", idx)
 			continue
 		}
 

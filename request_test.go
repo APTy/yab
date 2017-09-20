@@ -314,7 +314,7 @@ func TestDetectEncoding(t *testing.T) {
 func TestNewRequestWithMetadata(t *testing.T) {
 	req := &transport.Request{Method: "foo"}
 	topts := TransportOptions{ServiceName: "bar"}
-	reqWithMeta := mutateRequestWithMetadata(req, topts)
+	reqWithMeta := newRequestWithMetadata(req, topts)
 	assert.Equal(t, "foo", reqWithMeta.Method)
 	assert.Equal(t, "bar", reqWithMeta.TargetService)
 }
@@ -322,7 +322,7 @@ func TestNewRequestWithMetadata(t *testing.T) {
 func TestNewRequestWithTransportMiddleware(t *testing.T) {
 	req := &transport.Request{Method: "foo"}
 	transportmiddleware.Register(mockTransportMiddleware{})
-	processedReq, err := mutateRequestWithTransportMiddleware(req)
+	processedReq, err := newRequestWithTransportMiddleware(req)
 	assert.NoError(t, err)
 	assert.Equal(t, "bar", processedReq.Method)
 }
@@ -346,7 +346,7 @@ func TestNewRequestWithCLIOverrides(t *testing.T) {
 		},
 	}
 	headers := map[string]string{"bing": "bong"}
-	finalReq := mutateRequestWithCLIOverrides(req, headers, opts)
+	finalReq := newRequestWithCLIOverrides(req, headers, opts)
 	assert.Equal(t, "foo", finalReq.Method)
 	assert.Equal(t, 10*time.Second, finalReq.Timeout)
 	assert.Equal(t, "large", finalReq.Baggage["size"])

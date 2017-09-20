@@ -132,26 +132,28 @@ func detectEncoding(opts RequestOptions) encoding.Encoding {
 // prepares the request by injecting metadata, applying plugin-based transport middleware,
 // before finally adding any user-provided override values
 func prepareRequest(req *transport.Request, headers map[string]string, opts Options) (*transport.Request, error) {
-	reqWithMeta := mutateRequestWithMetadata(req, opts.TOpts)
-	processedReq, err := mutateRequestWithTransportMiddleware(reqWithMeta)
+	reqWithMeta := newRequestWithMetadata(req, opts.TOpts)
+	processedReq, err := newRequestWithTransportMiddleware(reqWithMeta)
 	if err != nil {
 		return nil, err
 	}
-	return mutateRequestWithCLIOverrides(processedReq, headers, opts), nil
+	return newRequestWithCLIOverrides(processedReq, headers, opts), nil
 }
 
-func mutateRequestWithMetadata(req *transport.Request, opts TransportOptions) *transport.Request {
+func newRequestWithMetadata(prevReq *transport.Request, opts TransportOptions) *transport.Request {
+	req := prevReq.DeepCopy()
 	req.TargetService = opts.ServiceName
 	return req
 }
 
-func mutateRequestWithTransportMiddleware(req *transport.Request) (*transport.Request, error) {
+func newRequestWithTransportMiddleware(prevReq *transport.Request) (*transport.Request, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	return transportmiddleware.Apply(ctx, req)
+	return transportmiddleware.Apply(ctx, prevReq)
 }
 
-func mutateRequestWithCLIOverrides(req *transport.Request, headers map[string]string, opts Options) *transport.Request {
+func newRequestWithCLIOverrides(prevReq *transport.Request, headers map[string]string, opts Options) *transport.Request {
+	req := prevReq.DeepCopy()
 	timeout := opts.ROpts.Timeout.Duration()
 	if timeout == 0 {
 		timeout = time.Second
