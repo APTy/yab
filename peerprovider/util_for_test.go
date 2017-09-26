@@ -8,7 +8,13 @@ func mustParseURL(s string) *url.URL {
 }
 
 func stubRegistry() func() {
+	lock.Lock()
 	oldRegistry := registry
 	registry = make(map[string]PeerProvider)
-	return func() { registry = oldRegistry }
+	lock.Unlock()
+	return func() {
+		lock.Lock()
+		registry = oldRegistry
+		lock.Unlock()
+	}
 }

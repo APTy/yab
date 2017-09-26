@@ -64,3 +64,18 @@ func TestFileScheme(t *testing.T) {
 		"2.2.2.2:2",
 	}, "obtains expected peers")
 }
+
+func TestConcurrentRegistry(t *testing.T) {
+	defer stubRegistry()()
+
+	f := &fakePeerProvider{res: []string{"who's on first"}}
+	g := &fakePeerProvider{res: []string{"what's on second"}}
+
+	go RegisterPeerProvider("fake", f)
+	go Schemes()
+	go Resolve(context.Background(), &url.URL{})
+
+	go RegisterPeerProvider("fake", g)
+	go Schemes()
+	go Resolve(context.Background(), &url.URL{})
+}
