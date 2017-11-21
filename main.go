@@ -40,6 +40,7 @@ import (
 	"github.com/opentracing/opentracing-go"
 	opentracing_ext "github.com/opentracing/opentracing-go/ext"
 	"github.com/uber/jaeger-client-go"
+	jconfig "github.com/uber/jaeger-client-go/config"
 	"github.com/uber/tchannel-go"
 	"go.uber.org/zap"
 )
@@ -360,7 +361,16 @@ func getTracer(opts Options, out output) (opentracing.Tracer, io.Closer) {
 		closer io.Closer
 	)
 	if opts.TOpts.Jaeger && !opts.TOpts.NoJaeger {
-		tracer, closer = jaeger.NewTracer(opts.TOpts.CallerName, jaeger.NewConstSampler(true), jaeger.NewNullReporter())
+		sampler := jaeger.NewConstSampler(true)
+		if opts.BOpts.enabled() {
+			jCfg := &jconfig.SamplerConfig{Type: "const", Param: 0}
+			jSampler, err := jCfg.NewSampler(opts.TOpts.CallerName, jaeger.NewNullMetrics())
+			if err != nil {
+				out.Fatalf("Error creating sampler for benchmark")
+			}
+			sampler = jSampler
+		}
+		tracer, closer = jaeger.NewTracer(opts.TOpts.CallerName, sampler, jaeger.NewNullReporter())
 	} else if len(opts.ROpts.Baggage) > 0 {
 		out.Fatalf("To propagate baggage, you must opt-into a tracing client, i.e., --jaeger")
 	}
