@@ -26,6 +26,7 @@ import (
 	"testing"
 	"time"
 
+	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/yarpc/yab/transport"
 
 	"github.com/stretchr/testify/assert"
@@ -86,7 +87,7 @@ func TestBenchmark(t *testing.T) {
 				Concurrency: 2,
 			},
 			TOpts: s.transportOpts(),
-		}, m)
+		}, opentracing.NoopTracer{}, m)
 
 		bufStr := buf.String()
 		assert.Contains(t, bufStr, "Max RPS")
@@ -142,7 +143,7 @@ func TestRunBenchmarkErrors(t *testing.T) {
 		// need to run the benchmark in a separate goroutine.
 		go func() {
 			defer wg.Done()
-			runBenchmark(out, _testLogger, opts, m)
+			runBenchmark(out, _testLogger, opts, opentracing.NoopTracer{}, m)
 		}()
 
 		wg.Wait()

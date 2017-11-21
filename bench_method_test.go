@@ -92,7 +92,7 @@ func TestBenchmarkMethodWarmTransport(t *testing.T) {
 			Peers:       []string{tt.peer},
 		}
 
-		transport, err := m.WarmTransport(tOpts, 1 /* warmupRequests */)
+		transport, err := m.WarmTransport(tOpts, 1 /* warmupRequests */, opentracing.NoopTracer{})
 		if tt.wantErr != "" {
 			if assert.Error(t, err, "WarmTransport should fail") {
 				assert.Contains(t, err.Error(), tt.wantErr, "Invalid error message")
@@ -225,7 +225,7 @@ func TestBenchmarkMethodWarmTransportsSuccess(t *testing.T) {
 		ServiceName: "foo",
 		Peers:       serverHPs,
 	}
-	transports, err := m.WarmTransports(numServers, tOpts, 1 /* warmupRequests */)
+	transports, err := m.WarmTransports(numServers, tOpts, 1 /* warmupRequests */, opentracing.NoopTracer{})
 	assert.NoError(t, err, "WarmTransports should not fail")
 	assert.Equal(t, numServers, len(transports), "Got unexpected number of transports")
 	for i, transport := range transports {
@@ -284,7 +284,7 @@ func TestBenchmarkMethodWarmTransportsError(t *testing.T) {
 			ServiceName: "foo",
 			Peers:       []string{s.hostPort()},
 		}
-		_, err := m.WarmTransports(10, tOpts, tt.warmup)
+		_, err := m.WarmTransports(10, tOpts, tt.warmup, opentracing.NoopTracer{})
 		if tt.wantErr {
 			assert.Error(t, err, "%v: WarmTransports should fail", msg)
 		} else {

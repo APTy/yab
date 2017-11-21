@@ -344,7 +344,7 @@ func runWithOptions(opts Options, out output, logger *zap.Logger) {
 		makeInitialRequest(out, transport, serializer, req)
 	}
 
-	runBenchmark(out, logger, opts, benchmarkMethod{
+	runBenchmark(out, logger, opts, tracer, benchmarkMethod{
 		serializer: serializer,
 		req:        req,
 	})
